@@ -7,16 +7,14 @@ import os
 import bottleneck as bn
 
 
-
-
 def load_train_data(csv_file, n_items, n_users, global_indexing=False):
     tp = pd.read_csv(csv_file)
-    
+
     n_users = n_users if global_indexing else tp['uid'].max() + 1
 
     rows, cols = tp['uid'], tp['sid']
     data = sparse.csr_matrix((np.ones_like(rows),
-                             (rows, cols)), dtype='float64',
+                              (rows, cols)), dtype='float64',
                              shape=(n_users, n_items))
     return data
 
@@ -36,9 +34,9 @@ def load_tr_te_data(csv_file_tr, csv_file_te, n_items, n_users, global_indexing=
     rows_te, cols_te = tp_te['uid'] - start_idx, tp_te['sid']
 
     data_tr = sparse.csr_matrix((np.ones_like(rows_tr),
-                             (rows_tr, cols_tr)), dtype='float64', shape=(end_idx - start_idx + 1, n_items))
+                                 (rows_tr, cols_tr)), dtype='float64', shape=(end_idx - start_idx + 1, n_items))
     data_te = sparse.csr_matrix((np.ones_like(rows_te),
-                             (rows_te, cols_te)), dtype='float64', shape=(end_idx - start_idx + 1, n_items))
+                                 (rows_te, cols_te)), dtype='float64', shape=(end_idx - start_idx + 1, n_items))
     return data_tr, data_te
 
 
@@ -47,31 +45,33 @@ def get_data(dataset, global_indexing=False):
     with open(os.path.join(dataset, 'unique_sid.txt'), 'r') as f:
         for line in f:
             unique_sid.append(line.strip())
-    
+
     unique_uid = list()
     with open(os.path.join(dataset, 'unique_uid.txt'), 'r') as f:
         for line in f:
             unique_uid.append(line.strip())
-            
+
     n_items = len(unique_sid)
     n_users = len(unique_uid)
-    
-    train_data = load_train_data(os.path.join(dataset, 'train.csv'), n_items, n_users, global_indexing=global_indexing)
 
+    train_data = load_train_data(os.path.join(
+        dataset, 'train.csv'), n_items, n_users, global_indexing=global_indexing)
 
     vad_data_tr, vad_data_te = load_tr_te_data(os.path.join(dataset, 'validation_tr.csv'),
-                                               os.path.join(dataset, 'validation_te.csv'),
-                                               n_items, n_users, 
+                                               os.path.join(
+                                                   dataset, 'validation_te.csv'),
+                                               n_items, n_users,
                                                global_indexing=global_indexing)
 
     test_data_tr, test_data_te = load_tr_te_data(os.path.join(dataset, 'test_tr.csv'),
-                                                 os.path.join(dataset, 'test_te.csv'),
-                                                 n_items, n_users, 
+                                                 os.path.join(
+                                                     dataset, 'test_te.csv'),
+                                                 n_items, n_users,
                                                  global_indexing=global_indexing)
-    
+
     data = train_data, vad_data_tr, vad_data_te, test_data_tr, test_data_te
     data = (x.astype('float32') for x in data)
-    
+
     return data
 
 
